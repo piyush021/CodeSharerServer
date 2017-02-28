@@ -8,9 +8,10 @@ import javax.swing.SwingConstants;
 public class ServerWindow extends JFrame {
 	JLabel labelOutputMessage;
 	boolean isRunningInSafeMode;
-	
-	public ServerWindow(boolean isRunningInSafeMode){
+	String defaultDirectory;
+	public ServerWindow(String defaultDirectory,boolean isRunningInSafeMode){
 		super();
+		this.defaultDirectory=defaultDirectory;
 		this.isRunningInSafeMode=isRunningInSafeMode;
 		setTitle("CodeSharerServer");
 		this.setIconImage(new ImageIcon(this.getClass().getResource("/mainIcon.png")).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
@@ -30,7 +31,7 @@ public class ServerWindow extends JFrame {
 				new UDPServerToSendIP(ServerWindow.this).startUDPServer();
 			}
 		}).start();
-		new TCPServer(ServerWindow.this).startTCPServer();
+		new TCPServer(ServerWindow.this,defaultDirectory).startTCPServer();
 	}
 
 }

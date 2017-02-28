@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -66,11 +67,23 @@ public class LoginWindowServer extends JFrame {
 				    String stringPassword = passwordFieldPassword.getText();
 				    if(stringPassword.equals("")&& stringUsername.equals("")){
 					    setVisible(false);
+					    
 					    new Thread(new Runnable(){
 					    	@Override
 					        public void run(){
+					    		JFileChooser fileChooser=new JFileChooser();
+							    fileChooser.setDialogTitle("Select Default Directory");
+							    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+							    fileChooser.setAcceptAllFileFilterUsed(false);
+							    String defaultDirectory="";
+							    while(true){
+							    	if(fileChooser.showDialog(LoginWindowServer.this,"Select")==JFileChooser.APPROVE_OPTION){
+							    		defaultDirectory=fileChooser.getSelectedFile().getAbsolutePath();
+							    		break;
+							    	}	
+							    }
 					    		//start both udp and tcp server
-					    		new ServerWindow(isRunningInSafeMode).startServers();
+					    		new ServerWindow(defaultDirectory,isRunningInSafeMode).startServers();
 					    	}	        
 					    }).start();
 					    LoginWindowServer.this.dispose();

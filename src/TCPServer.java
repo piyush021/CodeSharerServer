@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 
 public class TCPServer {
 	
-	final private String directoryToStoreRecievedFiles="C:\\Users\\Varsha yadav\\Saurabh";
+	private String directoryToStoreRecievedFiles;
 	private ServerSocket serverSocket=null;
 	private Socket socket=null;
 	private LinkedList linkedList;
@@ -21,8 +21,9 @@ public class TCPServer {
 	private String nameOfLastFileSender="";
 	private ServerWindow referenceToServerWindow=null;
 	
-	public TCPServer(ServerWindow referenceToServerWindow){
+	public TCPServer(ServerWindow referenceToServerWindow, String defaultDirectory){
 		this.referenceToServerWindow=referenceToServerWindow;
+		this.directoryToStoreRecievedFiles=defaultDirectory;
 	}
 	
 	public void startTCPServer(){
@@ -61,7 +62,7 @@ public class TCPServer {
 			try {
 				dataInputStream = new DataInputStream(socketReferenceToCurrentClient.getInputStream());
 			} catch (IOException e1) {
-		
+				return;
 			}
 			String userName="";
 			try {
