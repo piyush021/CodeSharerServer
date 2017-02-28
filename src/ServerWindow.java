@@ -1,5 +1,4 @@
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
@@ -9,9 +8,11 @@ import javax.swing.SwingConstants;
 
 public class ServerWindow extends JFrame {
 	JLabel labelOutputMessage;
+	boolean isRunningInSafeMode;
 	
-	public ServerWindow(){
+	public ServerWindow(boolean isRunningInSafeMode){
 		super();
+		this.isRunningInSafeMode=isRunningInSafeMode;
 		setTitle("CodeSharerServer");
 		this.setIconImage(new ImageIcon(this.getClass().getResource("/mainIcon.png")).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
 		labelOutputMessage=new JLabel("Server is running......",SwingConstants.CENTER);

@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import javax.swing.JOptionPane;
-import javax.xml.crypto.Data;
 
 
 public class TCPServer {
@@ -126,7 +125,9 @@ public class TCPServer {
 							totalBytesRead+=bytesReadThisTime;
 						}
 						//send files to all clients except who sent it
-						linkedList.sendCommandExceptToClient(socketReferenceToCurrentClient,"INITIATE_FILE_TRANSFER_FROM_SERVER_TO_CLIENT@"+recievedFileLength+"#"+recievedFileName);
+						//do not send files if safe mode is on
+						if(!referenceToServerWindow.isRunningInSafeMode)
+							linkedList.sendCommandExceptToClient(socketReferenceToCurrentClient,"INITIATE_FILE_TRANSFER_FROM_SERVER_TO_CLIENT@"+recievedFileLength+"#"+recievedFileName);
 						
 					}catch(Exception e){
 
@@ -142,10 +143,15 @@ public class TCPServer {
 					}
 				}
 				else if(message.trim().equals("START_SENDING")){
-					linkedList.sendFileToParticularClient(socketReferenceToCurrentClient,absolutePathOfLastFileRecieved,nameOfLastFileSender);
+					//although this condition is not needed to be checked
+					if(!referenceToServerWindow.isRunningInSafeMode)
+						linkedList.sendFileToParticularClient(socketReferenceToCurrentClient,absolutePathOfLastFileRecieved,nameOfLastFileSender);
 				}
-				else
-					linkedList.distributeMessage(message.trim());					
+				else{
+					//distribute messages if not running in safe mode
+					if(!referenceToServerWindow.isRunningInSafeMode)
+						linkedList.distributeMessage(message.trim());
+				}
 			}
 		}
 	}

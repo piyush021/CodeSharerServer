@@ -5,12 +5,12 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -18,33 +18,48 @@ public class LoginWindowServer extends JFrame {
 
 	private JLabel labelUserName;
 	private JLabel labelPassword;
-	private JButton buttonSubmit;
+	private JButton buttonStartServer;
 	private JTextField textFieldUserName;
 	private JPasswordField passwordFieldPassword;
+	private JCheckBox checkBoxRunInSafeMode;
+	private boolean isRunningInSafeMode=false;
 	
 		@SuppressWarnings("deprecation")
 		public LoginWindowServer(){
 			super();
 			setTitle("CodeSharerServer");
 			setIconImage(new ImageIcon(this.getClass().getResource("/mainIcon.png")).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-		    labelUserName = new JLabel("Enter ADMIN Username");
-		    textFieldUserName = new JTextField(20);
-		    labelPassword = new JLabel("Enter ADMIN Password");
-		    passwordFieldPassword = new JPasswordField(20);
-		    buttonSubmit = new JButton("Start Server");
+		    labelUserName = new JLabel("Enter Admin Username");
+		    textFieldUserName = new JTextField(22);
+		    labelPassword = new JLabel("Enter Admin Password");
+		    passwordFieldPassword = new JPasswordField(22);
+		    buttonStartServer = new JButton("Start Server");
+		    checkBoxRunInSafeMode=new JCheckBox("Run In Safe Mode");
 		    setLayout(new FlowLayout());
 		    add(labelUserName);
 		    add(textFieldUserName);
 		    add(labelPassword);
 		    add(passwordFieldPassword);
-		    add(buttonSubmit);
+		    add(checkBoxRunInSafeMode);
+		    add(buttonStartServer);
 		    setSize(300,175);
 		    setResizable(false);
 		    setLocationRelativeTo(null);
 		    setVisible(true);   
 		    addWindowListener(new ExitApplication());
 		    
-		    buttonSubmit.addActionListener(new ActionListener(){
+		    checkBoxRunInSafeMode.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(checkBoxRunInSafeMode.isSelected()){
+						isRunningInSafeMode=true;
+					}else{
+						isRunningInSafeMode=false;
+					}
+				}
+			});
+		    buttonStartServer.addActionListener(new ActionListener(){
 		    	@Override
 		    	public void actionPerformed(ActionEvent e){
 				    final String stringUsername = textFieldUserName.getText();
@@ -55,7 +70,7 @@ public class LoginWindowServer extends JFrame {
 					    	@Override
 					        public void run(){
 					    		//start both udp and tcp server
-					    		new ServerWindow().startServers();
+					    		new ServerWindow(isRunningInSafeMode).startServers();
 					    	}	        
 					    }).start();
 					    LoginWindowServer.this.dispose();
