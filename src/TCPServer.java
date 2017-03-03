@@ -13,17 +13,14 @@ import javax.swing.JOptionPane;
 
 public class TCPServer {
 	
-	private String directoryToStoreRecievedFiles;
 	private ServerSocket serverSocket=null;
 	private Socket socket=null;
-	private LinkedList linkedList;
-	private String absolutePathOfLastFileRecieved="";
-	private String nameOfLastFileSender="";
+	public LinkedList linkedList;
+	
 	private ServerWindow referenceToServerWindow=null;
 	
-	public TCPServer(ServerWindow referenceToServerWindow, String defaultDirectory){
+	public TCPServer(ServerWindow referenceToServerWindow){
 		this.referenceToServerWindow=referenceToServerWindow;
-		this.directoryToStoreRecievedFiles=defaultDirectory;
 	}
 	
 	public void startTCPServer(){
@@ -72,14 +69,21 @@ public class TCPServer {
 			} catch (IOException e) {
 
 			}
-			linkedList.sendNotificationToAllClients(userName +" joined");
+			
+			//sending names for active users as first message
+			linkedList.sendNamesOfActiveClientsToParticularClient(socketReferenceToCurrentClient);
+			
+			
+			linkedList.sendNotificationToAllClientsExcept(socketReferenceToCurrentClient,userName +" joined");
+			linkedList.sendCommandToAllClientsExcept(socketReferenceToCurrentClient,"INSERT@"+userName);
 			
 			while(true){
 				try {
 					message=dataInputStream.readUTF();					
-				}catch(SocketException e){
+				}catch(SocketException|NullPointerException e){
 					linkedList.delete(socketReferenceToCurrentClient);
 					linkedList.sendNotificationToAllClients(userName+" left");
+					linkedList.sendCommandToAllClients("REMOVE@"+userName);
 					try {
 						socketReferenceToCurrentClient.close();
 					} catch (IOException e1) {
@@ -90,69 +94,10 @@ public class TCPServer {
 				catch (IOException e) {
 
 				}
-				
-				if(message.trim().startsWith("INITIATE_FILE_TRANSFER_FROM_CLIENT_TO_SERVER")){
-					
-					linkedList.sendCommandToParticularClient(socketReferenceToCurrentClient, "START_SENDING");
-					final String recievedFileName=message.trim().substring(message.trim().lastIndexOf('#')+1, message.trim().length());
-					final int recievedFileLength=Integer.valueOf(message.trim().substring(message.trim().lastIndexOf('@')+1, message.trim().lastIndexOf('#')));
-					final String absolutePathOfRecievedFile=directoryToStoreRecievedFiles+"\\"+recievedFileName;
-					int totalBytesRead=0;
-					int bytesReadThisTime=0;
-					//outer class attribute
-					absolutePathOfLastFileRecieved=absolutePathOfRecievedFile;
-					//delete the old file with same name
-					File temp=new File(absolutePathOfRecievedFile);
-					if(temp.exists())
-						temp.delete();
-					temp=null;
-					//outer class attribute
-					nameOfLastFileSender=linkedList.getNameOfClient(socketReferenceToCurrentClient);
-					FileOutputStream fileOutputStream=null;
-					BufferedOutputStream bufferedOutputStream=null;
-					try{
-						InputStream inputStream=socketReferenceToCurrentClient.getInputStream();
-						fileOutputStream=new FileOutputStream(absolutePathOfRecievedFile,true);
-						bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
-						byte recievedbytes[]=new byte[99999999];
-						bytesReadThisTime=inputStream.read(recievedbytes,0,recievedbytes.length);
-						bufferedOutputStream.write(recievedbytes, 0, bytesReadThisTime);
-						totalBytesRead=bytesReadThisTime;
-					
-					
-						while(totalBytesRead<recievedFileLength){
-							bytesReadThisTime=inputStream.read(recievedbytes,0, recievedbytes.length);
-							bufferedOutputStream.write(recievedbytes, 0, bytesReadThisTime);
-							totalBytesRead+=bytesReadThisTime;
-						}
-						//send files to all clients except who sent it
-						//do not send files if safe mode is on
-						if(!referenceToServerWindow.isRunningInSafeMode)
-							linkedList.sendCommandExceptToClient(socketReferenceToCurrentClient,"INITIATE_FILE_TRANSFER_FROM_SERVER_TO_CLIENT@"+recievedFileLength+"#"+recievedFileName);
-						
-					}catch(Exception e){
+				//distribute messages if not running in safe mode
+				if(!referenceToServerWindow.isRunningInSafeMode)
+					linkedList.distributeMessage(message.trim());
 
-					}
-					finally{
-						try {
-							bufferedOutputStream.flush();
-							bufferedOutputStream.close();
-							fileOutputStream.flush();
-							fileOutputStream.close();
-						} catch (IOException e) {
-						}
-					}
-				}
-				else if(message.trim().equals("START_SENDING")){
-					//although this condition is not needed to be checked
-					if(!referenceToServerWindow.isRunningInSafeMode)
-						linkedList.sendFileToParticularClient(socketReferenceToCurrentClient,absolutePathOfLastFileRecieved,nameOfLastFileSender);
-				}
-				else{
-					//distribute messages if not running in safe mode
-					if(!referenceToServerWindow.isRunningInSafeMode)
-						linkedList.distributeMessage(message.trim());
-				}
 			}
 		}
 	}

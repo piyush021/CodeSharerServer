@@ -21,7 +21,7 @@ public class ServerWindow extends JFrame {
 		setSize(300,300);
 		setResizable(false);
 		setLocationRelativeTo(null);
-		addWindowListener(new ExitApplication());		
+		addWindowListener(new ExitApplication());	
 	}
 	
 	public void startServers(){
@@ -31,7 +31,14 @@ public class ServerWindow extends JFrame {
 				new UDPServerToSendIP(ServerWindow.this).startUDPServer();
 			}
 		}).start();
-		new TCPServer(ServerWindow.this,defaultDirectory).startTCPServer();
+	    final TCPServer tcpServer=new TCPServer(ServerWindow.this);
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				tcpServer.startTCPServer();			
+			}
+		}).start();
+		new TCPServerForFileTransfer(ServerWindow.this,tcpServer,defaultDirectory).startTCPServerForFileTransfer();
 	}
 
 }

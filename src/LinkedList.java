@@ -59,87 +59,6 @@ class LinkedList{
                 previous.next=current.next;
         }
 
-	public void distributeMessage(String message){
-		Node temp=head;
-		while(temp!=null){
-			if(temp.dataOutputStream!=null)
-				try {
-					temp.dataOutputStream.writeUTF(
-							"________________________________________________________________\n"+message+
-							"\n________________________________________________________________\n");
-							
-				} catch (IOException e) {
-		
-				}
-			temp=temp.next;
-		}
-	}
-	
-	
-	void sendFileToParticularClient(Socket socket,final String fileFullPath,final String senderName){
-		//run on same thread
-		//we dont want to send message in between file transfer
-		//that will corrupt the file
-		File fileToSend=null;
-		FileInputStream fileInputStream=null;
-		BufferedInputStream bufferedInputStream=null;
-		try{
-			OutputStream outputStream=socket.getOutputStream();
-			fileToSend=new File(fileFullPath);
-			byte byteArrayOfFileToSend[]=new byte[99999999];
-			fileInputStream=new FileInputStream(fileToSend);
-			bufferedInputStream=new BufferedInputStream(fileInputStream);
-			int bytesRead=bufferedInputStream.read(byteArrayOfFileToSend, 0, byteArrayOfFileToSend.length);
-			outputStream.write(byteArrayOfFileToSend, 0,bytesRead);
-			while((bytesRead=bufferedInputStream.read(byteArrayOfFileToSend, 0, byteArrayOfFileToSend.length))!=-1){
-				outputStream.write(byteArrayOfFileToSend, 0, bytesRead);
-			}
-			
-			outputStream.flush();
-			sendNotificationToParticularClient(socket,senderName+" sent a file \""+fileToSend.getName()+"\"."
-					+ "\nPlease check your download directory of CodeSharer");
-		}catch(Exception e){
-
-		}finally{
-			try {
-				bufferedInputStream.close();
-				fileInputStream.close();
-			} catch (IOException e) {
-			}
-		}
-	}
-	
-	
-
-	public void sendNotificationToParticularClient(Socket socket,String message){
-		Node temp=head;
-		while(temp!=null&&temp.socket!=socket)
-			temp=temp.next;
-		try {
-			temp.dataOutputStream.writeUTF("\n******************************************************************************************\n"
-					+message+"...\n"
-					+"******************************************************************************************\n");
-		
-		} catch (IOException e) {
-	
-		}		
-	}
-	public void sendNotificationToAllClients(String message){
-		Node temp=head;
-		while(temp!=null){
-			if(temp.dataOutputStream!=null)
-				try {
-					temp.dataOutputStream.writeUTF("\n******************************************************************************************\n"
-							+message+"...\n"
-							+"******************************************************************************************\n");
-							
-				} catch (IOException e) {
-		
-				}
-			temp=temp.next;
-		}
-	}
-	
 	void setNameOfClient(Socket socket,String userName){
 		Node temp=head;
 		while(temp!=null&&temp.socket!=socket)
@@ -160,7 +79,81 @@ class LinkedList{
 	}
 	
 	
+	public void sendNamesOfActiveClientsToParticularClient(Socket socket){
+		String userNamesOfActiveClients="";
+		Node temp=head;
+		Node client=null;
+		while(temp!=null){
+			if(temp.socket==socket)
+				client=temp;
+			userNamesOfActiveClients+=(temp.userName+"+");
+			temp=temp.next;
+		}
+		try {
+			client.dataOutputStream.writeUTF(userNamesOfActiveClients);
+		} catch (IOException e) {
+			
+		}
+	}
 	
+	
+	
+	
+	
+	//used by class TCPServer only	
+	public void distributeMessage(String message){
+		Node temp=head;
+		while(temp!=null){
+			if(temp.dataOutputStream!=null)
+				try {
+					temp.dataOutputStream.writeUTF(
+							"________________________________________________________________\n"+message+
+							"\n________________________________________________________________\n");
+							
+				} catch (IOException e) {
+		
+				}
+			temp=temp.next;
+		}
+	}
+	
+	//used by class TCPServer only
+	public void sendNotificationToAllClients(String message){
+		Node temp=head;
+		while(temp!=null){
+			if(temp.dataOutputStream!=null)
+				try {
+					temp.dataOutputStream.writeUTF("\n******************************************************************************************\n"
+							+message+"...\n"
+							+"******************************************************************************************\n");
+							
+				} catch (IOException e) {
+		
+				}
+			temp=temp.next;
+		}
+	}
+
+	//used by class TCPServer only
+	public void sendNotificationToAllClientsExcept(Socket socket,String message){
+		Node temp=head;
+		while(temp!=null){
+			if(temp.dataOutputStream!=null&&temp.socket!=socket)
+				try {
+					temp.dataOutputStream.writeUTF("\n******************************************************************************************\n"
+							+message+"...\n"
+							+"******************************************************************************************\n");
+							
+				} catch (IOException e) {
+		
+				}
+			temp=temp.next;
+		}
+	}
+
+	
+	//used by class TCPServerForFileTransfer only
+	//send commands like START_SENDING,STARRT_RECIEVING
 	public void sendCommandToParticularClient(Socket socket,String message){
 		Node temp=head;
 		while(temp!=null&&temp.socket!=socket)
@@ -174,6 +167,22 @@ class LinkedList{
 	}
 	
 	
+	public void sendCommandToAllClientsExcept(Socket socket,String message){
+		Node temp=head;
+		while(temp!=null){
+			if(temp.dataOutputStream!=null&&temp.socket!=socket)
+				try {
+					temp.dataOutputStream.writeUTF(message);
+				} catch (IOException e) {
+		
+				}
+			temp=temp.next;
+		}
+	}
+
+	//used by class TCPServerForFileTransfer only
+	//notify all clients about file sent by someone
+	//message will have the filename with format like "fileName(senderName)"
 	void sendCommandToAllClients(String message){
 		Node temp=head;
 		while(temp!=null){
@@ -181,22 +190,10 @@ class LinkedList{
 				try {
 					temp.dataOutputStream.writeUTF(message);			
 				} catch (IOException e) {
-		
 				}
 			temp=temp.next;
 		}
 	}
-	void sendCommandExceptToClient(Socket socket,String message){
-		Node temp=head;
-		while(temp!=null){
-			if(temp.dataOutputStream!=null&&temp.socket!=socket)
-				try {
-					temp.dataOutputStream.writeUTF(message);			
-				} catch (IOException e) {
-		
-				}
-			temp=temp.next;
-		}
-	}
+	
 }
 
