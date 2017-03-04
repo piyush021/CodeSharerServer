@@ -145,7 +145,9 @@ public class TCPServerForFileTransfer {
 				}
 				
 				else if(message.trim().startsWith("INITIATE_FILE_TRANSFER_FROM_SERVER_TO_CLIENT")){
-				
+					if(referenceToServerWindow.isRunningInSafeMode){
+						continue;
+					}
 					final String fileRequestedByClient=message.trim().substring(message.trim().lastIndexOf('#')+1, message.trim().length());
 					String nameOfFileToSend=directoryToStoreRecievedFiles+"\\"+fileRequestedByClient;
 					linkedList.sendCommandToParticularClient(socketReferenceToCurrentClient, "START_RECIEVING@"+new File(nameOfFileToSend).length()+"#"+fileRequestedByClient);
