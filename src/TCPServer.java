@@ -81,6 +81,7 @@ public class TCPServer {
 				try {
 					message=dataInputStream.readUTF();					
 				}catch(SocketException|NullPointerException e){
+					System.err.println(e);
 					linkedList.delete(socketReferenceToCurrentClient);
 					linkedList.sendNotificationToAllClients(userName+" left");
 					linkedList.sendCommandToAllClients("REMOVE@"+userName);

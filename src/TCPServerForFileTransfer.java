@@ -81,6 +81,7 @@ public class TCPServerForFileTransfer {
 				try {
 					message=dataInputStream.readUTF();					
 				}catch(SocketException|NullPointerException e){
+					System.err.println(e);
 					linkedList.delete(socketReferenceToCurrentClient);
 					try {
 						socketReferenceToCurrentClient.close();
@@ -90,7 +91,7 @@ public class TCPServerForFileTransfer {
 					return;
 				}
 				catch (IOException e) {
-
+					System.err.println(e);
 				}
 				
 				if(message.trim().startsWith("INITIATE_FILE_TRANSFER_FROM_CLIENT_TO_SERVER")){
@@ -155,7 +156,7 @@ public class TCPServerForFileTransfer {
 					FileInputStream fileInputStream=null;
 					BufferedInputStream bufferedInputStream=null;
 					try{
-						OutputStream outputStream=socket.getOutputStream();
+						OutputStream outputStream=socketReferenceToCurrentClient.getOutputStream();
 						fileToSend=new File(nameOfFileToSend);
 						byte byteArrayOfFileToSend[]=new byte[5242880];
 						fileInputStream=new FileInputStream(fileToSend);
@@ -167,7 +168,7 @@ public class TCPServerForFileTransfer {
 						}
 						outputStream.flush();
 					}catch(Exception e){
-						
+						System.err.println(e);
 					}finally{
 						try {
 							bufferedInputStream.close();

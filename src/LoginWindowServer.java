@@ -66,7 +66,6 @@ public class LoginWindowServer extends JFrame {
 				    final String stringUsername = textFieldUserName.getText();
 				    String stringPassword = passwordFieldPassword.getText();
 				    if(stringPassword.equals("")&& stringUsername.equals("")){
-					    setVisible(false);
 					    
 					    new Thread(new Runnable(){
 					    	@Override
@@ -76,17 +75,16 @@ public class LoginWindowServer extends JFrame {
 							    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 							    fileChooser.setAcceptAllFileFilterUsed(false);
 							    String defaultDirectory="";
-							    while(true){
-							    	if(fileChooser.showDialog(LoginWindowServer.this,"Select")==JFileChooser.APPROVE_OPTION){
-							    		defaultDirectory=fileChooser.getSelectedFile().getAbsolutePath();
-							    		break;
-							    	}	
+							    if(fileChooser.showDialog(LoginWindowServer.this,"Select")==JFileChooser.APPROVE_OPTION){
+							    	defaultDirectory=fileChooser.getSelectedFile().getAbsolutePath();
+							    	LoginWindowServer.this.dispose();
+							    }	
+							    else{
+							    	System.exit(0);
 							    }
-					    		//start both udp and tcp server
-					    		new ServerWindow(defaultDirectory,isRunningInSafeMode).startServers();
+							    new ServerWindow(defaultDirectory,isRunningInSafeMode).startServers();
 					    	}	        
 					    }).start();
-					    LoginWindowServer.this.dispose();
 				    }else{
 				    	JOptionPane.showMessageDialog(getRootPane(),"Incorrect password or Username !!!","ERROR",JOptionPane.ERROR_MESSAGE);
 				    }
