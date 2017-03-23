@@ -27,7 +27,8 @@ public class TCPServer {
 		try {
 			serverSocket = new ServerSocket(2222);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(referenceToServerWindow,"FATAL ERROR : Failed to start the server, please start the application again.","ERROR",JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(referenceToServerWindow,"FATAL ERROR : Failed to start the server, please start the application again."
+					+ "\n"+e.toString(),"ERROR",JOptionPane.ERROR_MESSAGE);
 			System.exit(0);
 		}
 		
